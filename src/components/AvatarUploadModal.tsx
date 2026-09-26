@@ -110,25 +110,25 @@ export const AvatarUploadModal: React.FC<AvatarUploadModalProps> = ({
   const initials = userEmail ? userEmail.slice(0, 2).toUpperCase() : 'HP'
 
   return (
-    <div className="modal-backdrop" onClick={onClose} role="dialog" aria-modal="true" aria-labelledby="avatar-modal-title">
+    <div className="modal-overlay" onClick={onClose} role="dialog" aria-modal="true" aria-labelledby="avatar-modal-title">
       <div
-        className="glass-panel modal-content"
+        className="modal-content"
         style={{ maxWidth: '440px' }}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Camera size={20} color="var(--neon-green)" />
-            <h2 id="avatar-modal-title" className="modal-title">Profile Avatar</h2>
+            <h2 id="avatar-modal-title" style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0 }}>Profile Avatar</h2>
           </div>
           <button
             type="button"
-            className="btn btn-secondary btn-icon"
+            className="modal-close-btn"
             onClick={onClose}
             aria-label="Close dialog"
             disabled={isUploading}
           >
-            <X size={16} />
+            <X size={18} />
           </button>
         </div>
 
