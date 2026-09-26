@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { Download, X, Laptop, Smartphone, Compass, Sparkles } from 'lucide-react'
 
 interface BeforeInstallPromptEvent extends Event {
@@ -127,18 +128,39 @@ export const InstallPwaButton: React.FC<{
       </button>
 
       {/* Cyber-Zen Installation Guide Modal */}
-      {showGuideModal && (
+      {showGuideModal && typeof document !== 'undefined' && createPortal(
         <div
           className="modal-overlay"
           onClick={() => setShowGuideModal(false)}
           role="dialog"
           aria-modal="true"
-          style={{ zIndex: 11000 }}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            width: '100vw',
+            height: '100vh',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '20px',
+            backgroundColor: 'rgba(15, 23, 42, 0.65)',
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+            zIndex: 99999,
+            boxSizing: 'border-box',
+          }}
         >
           <div
             className="modal-content"
             onClick={(e) => e.stopPropagation()}
-            style={{ maxWidth: '440px' }}
+            style={{
+              maxWidth: '440px',
+              width: '100%',
+              margin: 'auto',
+              maxHeight: '90vh',
+              overflowY: 'auto',
+              boxSizing: 'border-box',
+            }}
           >
             <div className="modal-header">
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -283,7 +305,8 @@ export const InstallPwaButton: React.FC<{
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   )
