@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { supabase } from '../lib/supabase.js'
 import type { CreateHabitInput } from '../types/habit'
 
@@ -10,21 +10,29 @@ export interface QueuedOfflineHabit extends CreateHabitInput {
   createdAt: string
 }
 
-export function useNetworkStatus(onSynced?: () => void) {
+// Retrieve queued items directly from localStorage
+export function getQueuedHabits(): QueuedOfflineHabit[] {
+  try {
+    const data = localStorage.getItem(QUEUE_STORAGE_KEY)
+    return data ? JSON.parse(data) : []
+  } catch (e) {
+    console.error('Failed to parse offline queue:', e)
+    return []
+  }
+}
+
+export function useNetworkStatus(onSynced?: (remaining?: QueuedOfflineHabit[]) => void) {
   const [isOnline, setIsOnline] = useState<boolean>(typeof navigator !== 'undefined' ? navigator.onLine : true)
   const [isSyncing, setIsSyncing] = useState<boolean>(false)
   const [syncSuccessNotice, setSyncSuccessNotice] = useState<string | null>(null)
 
-  // Retrieve queued items from localStorage
-  const getQueuedHabits = useCallback((): QueuedOfflineHabit[] => {
-    try {
-      const data = localStorage.getItem(QUEUE_STORAGE_KEY)
-      return data ? JSON.parse(data) : []
-    } catch (e) {
-      console.error('Failed to parse offline queue:', e)
-      return []
-    }
-  }, [])
+  // Re-entrancy guard ref to prevent concurrent sync executions
+  const isSyncingRef = useRef<boolean>(false)
+  const onSyncedRef = useRef(onSynced)
+
+  useEffect(() => {
+    onSyncedRef.current = onSynced
+  }, [onSynced])
 
   // Save queued habit offline
   const enqueueHabit = useCallback((habit: CreateHabitInput, userId: string): QueuedOfflineHabit => {
@@ -54,9 +62,13 @@ export function useNetworkStatus(onSynced?: () => void) {
 
   // Sync all queued habits to Supabase upon reconnecting
   const syncQueuedHabits = useCallback(async () => {
+    // Re-entrancy guard against concurrent sync executions
+    if (isSyncingRef.current) return
+
     const queue = getQueuedHabits()
     if (queue.length === 0) return
 
+    isSyncingRef.current = true
     setIsSyncing(true)
     let syncedCount = 0
     const remainingItems: QueuedOfflineHabit[] = []
@@ -91,15 +103,16 @@ export function useNetworkStatus(onSynced?: () => void) {
         setTimeout(() => setSyncSuccessNotice(null), 4000)
       }
 
-      if (onSynced) {
-        onSynced()
+      if (onSyncedRef.current) {
+        onSyncedRef.current(remainingItems)
       }
     } catch (err) {
       console.error('Sync error:', err)
     } finally {
+      isSyncingRef.current = false
       setIsSyncing(false)
     }
-  }, [getQueuedHabits, onSynced])
+  }, [])
 
   useEffect(() => {
     const handleOnline = () => {

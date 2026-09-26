@@ -7,10 +7,9 @@ import { EmptyState } from '../components/EmptyState'
 import { ErrorBoundary } from '../components/ErrorBoundary'
 import { AvatarUploadModal } from '../components/AvatarUploadModal'
 import { OfflineBanner } from '../components/OfflineBanner'
-import { UpdateToast } from '../components/UpdateToast'
 import { useHabits } from '../hooks/useHabits'
 import { useProfile } from '../hooks/useProfile'
-import { useNetworkStatus } from '../hooks/useNetworkStatus'
+import { useNetworkStatus, getQueuedHabits } from '../hooks/useNetworkStatus'
 import { useAuth } from '../context/AuthContext'
 import type { HabitWithStatus, CreateHabitInput, UpdateHabitInput } from '../types/habit'
 import { Plus, RefreshCw, AlertCircle, CheckCircle2, ListFilter, ShieldAlert } from 'lucide-react'
@@ -38,25 +37,11 @@ export const TrackerPage: React.FC = () => {
 
   // Handler called when offline habits finish syncing
   const handleSynced = useCallback(() => {
-    setLocalQueuedHabits([])
-    refreshHabits()
-  }, [refreshHabits])
-
-  const { isOnline, isSyncing, syncSuccessNotice, enqueueHabit, dequeueHabit } = useNetworkStatus(handleSynced)
-
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false)
-  const [habitToEdit, setHabitToEdit] = useState<HabitWithStatus | null>(null)
-  const [habitToDelete, setHabitToDelete] = useState<HabitWithStatus | null>(null)
-  const [filter, setFilter] = useState<'all' | 'pending' | 'completed'>('all')
-
-  // Offline queued habits for immediate optimistic UI rendering
-  const [localQueuedHabits, setLocalQueuedHabits] = useState<HabitWithStatus[]>(() => {
-    try {
-      const data = localStorage.getItem('habit_offline_queue_v1')
-      if (!data) return []
-      const parsed = JSON.parse(data)
-      return parsed.map((item: any) => ({
+    // Re-sync localQueuedHabits from getQueuedHabits in case any items failed to sync
+    const remaining = getQueuedHabits()
+    const userRemaining = user ? remaining.filter((item) => item.userId === user.id) : remaining
+    setLocalQueuedHabits(
+      userRemaining.map((item) => ({
         id: item.tempId,
         user_id: item.userId,
         name: item.name || 'Untitled Habit',
@@ -68,9 +53,34 @@ export const TrackerPage: React.FC = () => {
         completed_today: false,
         is_queued: true,
       }))
-    } catch {
-      return []
-    }
+    )
+    refreshHabits()
+  }, [user, refreshHabits])
+
+  const { isOnline, isSyncing, syncSuccessNotice, enqueueHabit, dequeueHabit } = useNetworkStatus(handleSynced)
+
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false)
+  const [habitToEdit, setHabitToEdit] = useState<HabitWithStatus | null>(null)
+  const [habitToDelete, setHabitToDelete] = useState<HabitWithStatus | null>(null)
+  const [filter, setFilter] = useState<'all' | 'pending' | 'completed'>('all')
+
+  // Offline queued habits for immediate optimistic UI rendering
+  const [localQueuedHabits, setLocalQueuedHabits] = useState<HabitWithStatus[]>(() => {
+    const data = getQueuedHabits()
+    const userQueue = user ? data.filter((item) => item.userId === user.id) : data
+    return userQueue.map((item) => ({
+      id: item.tempId,
+      user_id: item.userId,
+      name: item.name || 'Untitled Habit',
+      description: item.description || '',
+      frequency: item.frequency || 'daily',
+      target_streak: item.target_streak || 7,
+      created_at: item.createdAt || new Date().toISOString(),
+      current_streak: 0,
+      completed_today: false,
+      is_queued: true,
+    }))
   })
 
   // Error boundary simulation state
@@ -410,9 +420,6 @@ export const TrackerPage: React.FC = () => {
         userEmail={user?.email || null}
         onUpload={uploadAvatar}
       />
-
-      {/* PWA Update Toast notification */}
-      <UpdateToast />
     </div>
   )
 }
