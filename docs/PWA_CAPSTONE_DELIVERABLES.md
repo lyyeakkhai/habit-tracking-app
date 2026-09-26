@@ -108,7 +108,7 @@ Lighthouse mobile audits were executed against the production build preview (`ht
   - The offline banner counter updates to `"Offline Mode — 1 changes queued"`.
 - [x] **Step 5**: **LocalStorage Inspection**:
   - DevTools $\rightarrow$ **Application** $\rightarrow$ **Local Storage** $\rightarrow$ `http://localhost:4173/`.
-  - Key `habit_offline_queue_v1` contains an array with the newly queued habit object, temporary UUID (`temp-habit-...`), creation timestamp, and user ID.
+  - Key `habit_offline_queue_v1` contains an array with the newly queued habit object, temporary UUID (`offline_${crypto.randomUUID()}`), creation timestamp, and user ID.
 - [x] **Step 6**: Toggle Network throttling back to **Online** (or "No throttling").
 - [x] **Step 7**: **Automatic Sync Execution**:
   - The hook detects the `window.online` event.

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { Share2, Check } from 'lucide-react'
 
 interface ShareButtonProps {
@@ -23,6 +23,15 @@ export const ShareButton: React.FC<ShareButtonProps> = ({
   ariaLabel,
 }) => {
   const [copied, setCopied] = useState(false)
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
+      }
+    }
+  }, [])
 
   const handleShare = async () => {
     if (typeof navigator !== 'undefined' && navigator.share) {
@@ -45,7 +54,13 @@ export const ShareButton: React.FC<ShareButtonProps> = ({
         const textToCopy = text ? `${text} ${url}`.trim() : url
         await navigator.clipboard.writeText(textToCopy)
         setCopied(true)
-        setTimeout(() => setCopied(false), 2500)
+        if (timeoutRef.current) {
+          clearTimeout(timeoutRef.current)
+        }
+        timeoutRef.current = setTimeout(() => {
+          setCopied(false)
+          timeoutRef.current = null
+        }, 2500)
       }
     } catch (clipboardErr) {
       console.error('Clipboard copy failed:', clipboardErr)

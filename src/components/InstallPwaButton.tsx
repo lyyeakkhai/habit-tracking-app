@@ -16,18 +16,15 @@ export const InstallPwaButton: React.FC<{
   iconOnly = false,
 }) => {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
-  const [isInstalled, setIsInstalled] = useState(false)
+  const [isInstalled, setIsInstalled] = useState(() => {
+    if (typeof window === 'undefined') return false
+    return Boolean(
+      window.matchMedia('(display-mode: standalone)').matches ||
+      (window.navigator as unknown as { standalone?: boolean }).standalone
+    )
+  })
 
   useEffect(() => {
-    // 1. Check if already in standalone PWA mode
-    const isStandalone =
-      window.matchMedia('(display-mode: standalone)').matches ||
-      (window.navigator as unknown as { standalone?: boolean }).standalone === true
-    if (isStandalone) {
-      setIsInstalled(true)
-      return
-    }
-
     const mql = window.matchMedia('(display-mode: standalone)')
     const handleMqlChange = (e: MediaQueryListEvent) => {
       if (e.matches) {

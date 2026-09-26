@@ -35,6 +35,24 @@ export const TrackerPage: React.FC = () => {
 
   const { avatarUrl, uploadAvatar } = useProfile()
 
+  // Offline queued habits for immediate optimistic UI rendering
+  const [localQueuedHabits, setLocalQueuedHabits] = useState<HabitWithStatus[]>(() => {
+    const data = getQueuedHabits()
+    const userQueue = user ? data.filter((item) => item.userId === user.id) : data
+    return userQueue.map((item) => ({
+      id: item.tempId,
+      user_id: item.userId,
+      name: item.name || 'Untitled Habit',
+      description: item.description || '',
+      frequency: item.frequency || 'daily',
+      target_streak: item.target_streak || 7,
+      created_at: item.createdAt || new Date().toISOString(),
+      current_streak: 0,
+      completed_today: false,
+      is_queued: true,
+    }))
+  })
+
   // Handler called when offline habits finish syncing
   const handleSynced = useCallback(() => {
     // Re-sync localQueuedHabits from getQueuedHabits in case any items failed to sync
@@ -64,24 +82,6 @@ export const TrackerPage: React.FC = () => {
   const [habitToEdit, setHabitToEdit] = useState<HabitWithStatus | null>(null)
   const [habitToDelete, setHabitToDelete] = useState<HabitWithStatus | null>(null)
   const [filter, setFilter] = useState<'all' | 'pending' | 'completed'>('all')
-
-  // Offline queued habits for immediate optimistic UI rendering
-  const [localQueuedHabits, setLocalQueuedHabits] = useState<HabitWithStatus[]>(() => {
-    const data = getQueuedHabits()
-    const userQueue = user ? data.filter((item) => item.userId === user.id) : data
-    return userQueue.map((item) => ({
-      id: item.tempId,
-      user_id: item.userId,
-      name: item.name || 'Untitled Habit',
-      description: item.description || '',
-      frequency: item.frequency || 'daily',
-      target_streak: item.target_streak || 7,
-      created_at: item.createdAt || new Date().toISOString(),
-      current_streak: 0,
-      completed_today: false,
-      is_queued: true,
-    }))
-  })
 
   // Error boundary simulation state
   const [crashedSection, setCrashedSection] = useState<'nav' | 'stats' | 'habits' | null>(null)

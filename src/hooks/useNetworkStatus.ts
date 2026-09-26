@@ -47,7 +47,7 @@ export function useNetworkStatus(onSynced?: (remaining?: QueuedOfflineHabit[]) =
     const updated = [...currentQueue, queuedItem]
     localStorage.setItem(QUEUE_STORAGE_KEY, JSON.stringify(updated))
     return queuedItem
-  }, [getQueuedHabits])
+  }, [])
 
   // Remove queued habit offline (e.g. if deleted before sync)
   const dequeueHabit = useCallback((tempId: string) => {
@@ -58,7 +58,7 @@ export function useNetworkStatus(onSynced?: (remaining?: QueuedOfflineHabit[]) =
     } else {
       localStorage.removeItem(QUEUE_STORAGE_KEY)
     }
-  }, [getQueuedHabits])
+  }, [])
 
   // Sync all queued habits to Supabase upon reconnecting
   const syncQueuedHabits = useCallback(async () => {
@@ -75,18 +75,23 @@ export function useNetworkStatus(onSynced?: (remaining?: QueuedOfflineHabit[]) =
 
     try {
       for (const item of queue) {
-        const { error } = await supabase.from('habits').insert({
-          user_id: item.userId,
-          name: item.name,
-          description: item.description || '',
-          frequency: item.frequency || 'daily',
-          target_streak: item.target_streak || 7,
-        })
+        try {
+          const { error } = await supabase.from('habits').insert({
+            user_id: item.userId,
+            name: item.name,
+            description: item.description || '',
+            frequency: item.frequency || 'daily',
+            target_streak: item.target_streak || 7,
+          })
 
-        if (!error) {
-          syncedCount++
-        } else {
-          console.error('Failed to sync offline habit to Supabase:', error.message)
+          if (!error) {
+            syncedCount++
+          } else {
+            console.error('Failed to sync offline habit to Supabase:', error.message)
+            remainingItems.push(item)
+          }
+        } catch (itemErr) {
+          console.error('Exception syncing offline habit to Supabase:', itemErr)
           remainingItems.push(item)
         }
       }
@@ -129,11 +134,17 @@ export function useNetworkStatus(onSynced?: (remaining?: QueuedOfflineHabit[]) =
     window.addEventListener('offline', handleOffline)
 
     // Check if we started online but have lingering items to sync
+    let initialSyncTimer: ReturnType<typeof setTimeout> | null = null
     if (navigator.onLine) {
-      syncQueuedHabits()
+      initialSyncTimer = setTimeout(() => {
+        syncQueuedHabits()
+      }, 0)
     }
 
     return () => {
+      if (initialSyncTimer) {
+        clearTimeout(initialSyncTimer)
+      }
       window.removeEventListener('online', handleOnline)
       window.removeEventListener('offline', handleOffline)
     }
