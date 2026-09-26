@@ -43,11 +43,16 @@ export const SignupPage: React.FC = () => {
 
     try {
       setLoading(true)
-      const { error: signUpError, user: newUser } = await signUp(email.trim(), password)
+      const { error: signUpError, user: newUser, session: newSession } = await signUp(email.trim(), password)
       if (signUpError) {
         setError(signUpError.message)
       } else if (newUser && newUser.identities && newUser.identities.length === 0) {
         setError('An account with this email already exists.')
+      } else if (!newSession) {
+        // Email confirmation is required by Supabase project settings
+        setSuccessNotice(
+          'Account created! Please check your email inbox to confirm your address before signing in. (Tip: You can also disable "Confirm email" in your Supabase Dashboard under Authentication -> Providers -> Email for instant local dev).'
+        )
       } else {
         setSuccessNotice('Account created successfully! Redirecting to your habit dashboard...')
         setTimeout(() => {
