@@ -1,6 +1,8 @@
 import React from 'react'
 import { useAuth } from '../context/AuthContext'
 import { Zap, LogOut, Camera } from 'lucide-react'
+import { InstallPwaButton } from './InstallPwaButton'
+import { ShareButton } from './ShareButton'
 
 interface NavbarProps {
   completedCount?: number
@@ -43,10 +45,16 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         <div className="nav-actions">
           {totalCount > 0 && (
-            <div className="badge badge-neon" title="Today's habit completion status">
-              <span>{completedCount}/{totalCount} DONE</span>
+            <div className="badge badge-neon nav-badge" title="Today's habit completion status">
+              <span>{completedCount}/{totalCount} <span className="nav-badge-text">DONE</span></span>
             </div>
           )}
+
+          {/* Install PWA Button */}
+          <InstallPwaButton />
+
+          {/* Share App Button */}
+          <ShareButton />
 
           {/* User Profile & Avatar Pill */}
           {user?.email && (
@@ -54,56 +62,37 @@ export const Navbar: React.FC<NavbarProps> = ({
               className="nav-user-pill"
               onClick={onOpenAvatarModal}
               title={`Signed in as ${user.email}. Click to change avatar.`}
-              style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
               role="button"
               tabIndex={0}
               onKeyDown={(e) => e.key === 'Enter' && onOpenAvatarModal?.()}
+              aria-label={`User profile: ${user.email}`}
             >
               {avatarUrl ? (
                 <img
                   src={avatarUrl}
                   alt="User Avatar"
-                  style={{
-                    width: '24px',
-                    height: '24px',
-                    borderRadius: '50%',
-                    objectFit: 'cover',
-                    border: '1.5px solid var(--neon-green)',
-                  }}
+                  className="nav-user-avatar"
                 />
               ) : (
-                <div
-                  style={{
-                    width: '24px',
-                    height: '24px',
-                    borderRadius: '50%',
-                    backgroundColor: 'rgba(0, 230, 118, 0.2)',
-                    color: 'var(--neon-green)',
-                    fontSize: '0.7rem',
-                    fontWeight: 700,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    border: '1px solid var(--neon-green)',
-                  }}
-                >
+                <div className="nav-user-initials">
                   {initials}
                 </div>
               )}
-              <span>{user.email}</span>
-              <Camera size={13} color="var(--text-muted)" style={{ marginLeft: '2px' }} />
+              <span className="nav-user-email">
+                {user.email}
+              </span>
+              <Camera size={13} className="nav-user-camera" />
             </div>
           )}
 
           {onSimulateCrash && (
             <button
               type="button"
-              className="btn btn-secondary"
-              style={{ fontSize: '0.75rem', padding: '4px 8px', color: '#dc2626', borderColor: 'rgba(239, 68, 68, 0.3)' }}
+              className="btn btn-secondary nav-crash-btn"
               onClick={onSimulateCrash}
               title="Test Error Boundary in Navigation"
             >
-              💥 Crash Nav
+              💥 Crash
             </button>
           )}
 

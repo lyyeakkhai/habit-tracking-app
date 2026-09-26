@@ -318,29 +318,26 @@ export const TrackerPage: React.FC = () => {
 
         {/* Filter Tabs */}
         {totalCount > 0 && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px', flexWrap: 'wrap' }}>
+          <div className="filter-bar">
             <ListFilter size={16} color="var(--text-muted)" />
             <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginRight: '4px' }}>Filter:</span>
             <button
               type="button"
-              className={`btn btn-secondary ${filter === 'all' ? 'badge-neon' : ''}`}
-              style={{ padding: '6px 12px', fontSize: '0.82rem' }}
+              className={`btn btn-secondary filter-btn ${filter === 'all' ? 'badge-neon' : ''}`}
               onClick={() => setFilter('all')}
             >
               All ({totalCount})
             </button>
             <button
               type="button"
-              className={`btn btn-secondary ${filter === 'pending' ? 'badge-neon' : ''}`}
-              style={{ padding: '6px 12px', fontSize: '0.82rem' }}
+              className={`btn btn-secondary filter-btn ${filter === 'pending' ? 'badge-neon' : ''}`}
               onClick={() => setFilter('pending')}
             >
               Pending ({totalCount - completedCount})
             </button>
             <button
               type="button"
-              className={`btn btn-secondary ${filter === 'completed' ? 'badge-neon' : ''}`}
-              style={{ padding: '6px 12px', fontSize: '0.82rem' }}
+              className={`btn btn-secondary filter-btn ${filter === 'completed' ? 'badge-neon' : ''}`}
               onClick={() => setFilter('completed')}
             >
               Completed ({completedCount})
