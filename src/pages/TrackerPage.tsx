@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useCallback } from 'react'
 import { Navbar } from '../components/Navbar'
 import { HabitCard } from '../components/HabitCard'
 import { HabitModal } from '../components/HabitModal'
@@ -6,8 +6,11 @@ import { DeleteModal } from '../components/DeleteModal'
 import { EmptyState } from '../components/EmptyState'
 import { ErrorBoundary } from '../components/ErrorBoundary'
 import { AvatarUploadModal } from '../components/AvatarUploadModal'
+import { OfflineBanner } from '../components/OfflineBanner'
+import { UpdateToast } from '../components/UpdateToast'
 import { useHabits } from '../hooks/useHabits'
 import { useProfile } from '../hooks/useProfile'
+import { useNetworkStatus } from '../hooks/useNetworkStatus'
 import { useAuth } from '../context/AuthContext'
 import type { HabitWithStatus, CreateHabitInput, UpdateHabitInput } from '../types/habit'
 import { Plus, RefreshCw, AlertCircle, CheckCircle2, ListFilter, ShieldAlert } from 'lucide-react'
@@ -33,31 +36,67 @@ export const TrackerPage: React.FC = () => {
 
   const { avatarUrl, uploadAvatar } = useProfile()
 
+  // Handler called when offline habits finish syncing
+  const handleSynced = useCallback(() => {
+    setLocalQueuedHabits([])
+    refreshHabits()
+  }, [refreshHabits])
+
+  const { isOnline, isSyncing, syncSuccessNotice, enqueueHabit, dequeueHabit } = useNetworkStatus(handleSynced)
+
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false)
   const [habitToEdit, setHabitToEdit] = useState<HabitWithStatus | null>(null)
   const [habitToDelete, setHabitToDelete] = useState<HabitWithStatus | null>(null)
   const [filter, setFilter] = useState<'all' | 'pending' | 'completed'>('all')
 
+  // Offline queued habits for immediate optimistic UI rendering
+  const [localQueuedHabits, setLocalQueuedHabits] = useState<HabitWithStatus[]>(() => {
+    try {
+      const data = localStorage.getItem('habit_offline_queue_v1')
+      if (!data) return []
+      const parsed = JSON.parse(data)
+      return parsed.map((item: any) => ({
+        id: item.tempId,
+        user_id: item.userId,
+        name: item.name || 'Untitled Habit',
+        description: item.description || '',
+        frequency: item.frequency || 'daily',
+        target_streak: item.target_streak || 7,
+        created_at: item.createdAt || new Date().toISOString(),
+        current_streak: 0,
+        completed_today: false,
+        is_queued: true,
+      }))
+    } catch {
+      return []
+    }
+  })
+
   // Error boundary simulation state
   const [crashedSection, setCrashedSection] = useState<'nav' | 'stats' | 'habits' | null>(null)
 
+  // Merge server habits with any locally queued offline habits
+  const combinedHabits = useMemo(() => {
+    return [...localQueuedHabits, ...habits]
+  }, [localQueuedHabits, habits])
+
   // Calculate today's completion stats
-  const totalCount = habits.length
-  const completedCount = useMemo(() => habits.filter((h) => h.completed_today).length, [habits])
+  const totalCount = combinedHabits.length
+  const completedCount = useMemo(() => combinedHabits.filter((h) => h.completed_today).length, [combinedHabits])
   const completionPercent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0
 
   // Filtered habits
   const filteredHabits = useMemo(() => {
     switch (filter) {
       case 'completed':
-        return habits.filter((h) => h.completed_today)
+        return combinedHabits.filter((h) => h.completed_today)
       case 'pending':
-        return habits.filter((h) => !h.completed_today)
+        return combinedHabits.filter((h) => !h.completed_today)
       default:
-        return habits
+        return combinedHabits
     }
-  }, [habits, filter])
+  }, [combinedHabits, filter])
 
   const handleOpenAddModal = () => {
     setHabitToEdit(null)
@@ -70,6 +109,25 @@ export const TrackerPage: React.FC = () => {
   }
 
   const handleSaveHabit = async (data: CreateHabitInput | UpdateHabitInput) => {
+    // If user is offline, save habit to offline queue
+    if (!isOnline && !habitToEdit && user) {
+      const queuedItem = enqueueHabit(data as CreateHabitInput, user.id)
+      const optimisticHabit: HabitWithStatus = {
+        id: queuedItem.tempId,
+        user_id: user.id,
+        name: data.name || 'Untitled Habit',
+        description: data.description || '',
+        frequency: data.frequency || 'daily',
+        target_streak: data.target_streak || 7,
+        created_at: new Date().toISOString(),
+        current_streak: 0,
+        completed_today: false,
+        is_queued: true,
+      }
+      setLocalQueuedHabits((prev) => [optimisticHabit, ...prev])
+      return { error: null }
+    }
+
     if (habitToEdit) {
       return await updateHabit(habitToEdit.id, data)
     } else {
@@ -78,6 +136,12 @@ export const TrackerPage: React.FC = () => {
   }
 
   const handleDeleteConfirm = async (habitId: string) => {
+    // If it's a locally queued habit, remove from local queue and localStorage
+    if (habitId.startsWith('offline_')) {
+      dequeueHabit(habitId)
+      setLocalQueuedHabits((prev) => prev.filter((h) => h.id !== habitId))
+      return { error: null }
+    }
     return await deleteHabit(habitId)
   }
 
@@ -88,8 +152,18 @@ export const TrackerPage: React.FC = () => {
     day: 'numeric',
   }).format(new Date())
 
+  const queuedCount = localQueuedHabits.length
+
   return (
-    <div className="app-container">
+    <div className="app-container" style={{ overflowX: 'hidden', minWidth: '320px', width: '100%' }}>
+      {/* Offline Banner driven by online/offline events */}
+      <OfflineBanner
+        isOnline={isOnline}
+        isSyncing={isSyncing}
+        syncSuccessNotice={syncSuccessNotice}
+        queuedCount={queuedCount}
+      />
+
       {/* 1. Navigation Section wrapped in ErrorBoundary */}
       <ErrorBoundary
         sectionName="Navigation"
@@ -107,32 +181,32 @@ export const TrackerPage: React.FC = () => {
         )}
       </ErrorBoundary>
 
-      <main className="main-content">
+      <main className="main-content" style={{ boxSizing: 'border-box', width: '100%', maxWidth: '1024px', margin: '0 auto', padding: '24px 16px 80px' }}>
         {/* Error Boundary Testing Banner */}
         <div
           className="glass-panel"
           style={{
-            padding: '10px 16px',
+            padding: '10px 14px',
             marginBottom: '20px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             flexWrap: 'wrap',
-            gap: '10px',
+            gap: '8px',
             fontSize: '0.85rem',
             border: '1px dashed rgba(0, 230, 118, 0.4)',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <ShieldAlert size={16} color="var(--neon-green)" />
-            <span style={{ fontWeight: 600 }}>Error Boundary Audit Controls:</span>
-            <span style={{ color: 'var(--text-muted)' }}>Test isolation resilience without crashing page</span>
+            <span style={{ fontWeight: 600 }}>Error Boundary Controls:</span>
+            <span style={{ color: 'var(--text-muted)' }}>Crash section to verify app survives</span>
           </div>
-          <div style={{ display: 'flex', gap: '8px' }}>
+          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
             <button
               type="button"
               className="btn btn-secondary"
-              style={{ fontSize: '0.78rem', padding: '4px 10px' }}
+              style={{ fontSize: '0.75rem', padding: '4px 8px' }}
               onClick={() => setCrashedSection(crashedSection === 'stats' ? null : 'stats')}
             >
               {crashedSection === 'stats' ? 'Restore Stats' : '💥 Crash Stats'}
@@ -140,7 +214,7 @@ export const TrackerPage: React.FC = () => {
             <button
               type="button"
               className="btn btn-secondary"
-              style={{ fontSize: '0.78rem', padding: '4px 10px' }}
+              style={{ fontSize: '0.75rem', padding: '4px 8px' }}
               onClick={() => setCrashedSection(crashedSection === 'habits' ? null : 'habits')}
             >
               {crashedSection === 'habits' ? 'Restore Habits' : '💥 Crash Habits'}
@@ -148,7 +222,7 @@ export const TrackerPage: React.FC = () => {
             <button
               type="button"
               className="btn btn-secondary"
-              style={{ fontSize: '0.78rem', padding: '4px 10px' }}
+              style={{ fontSize: '0.75rem', padding: '4px 8px' }}
               onClick={() => setCrashedSection(crashedSection === 'nav' ? null : 'nav')}
             >
               {crashedSection === 'nav' ? 'Restore Nav' : '💥 Crash Nav'}
@@ -157,18 +231,18 @@ export const TrackerPage: React.FC = () => {
         </div>
 
         {/* Dashboard Header */}
-        <section className="dashboard-header">
-          <div className="header-title-section">
+        <section className="dashboard-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '14px', marginBottom: '24px' }}>
+          <div className="header-title-section" style={{ minWidth: 0 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
               <span className="badge badge-neon">{formattedToday}</span>
             </div>
-            <h1>Daily Habits</h1>
-            <p className="header-subtitle">
+            <h1 style={{ margin: 0, fontSize: 'clamp(1.5rem, 4vw, 2.2rem)', fontWeight: 800 }}>Daily Habits</h1>
+            <p className="header-subtitle" style={{ margin: '4px 0 0', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
               Build your streaks, track consistency, and unlock your potential.
             </p>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
             <button
               type="button"
               className="btn btn-secondary btn-icon"
@@ -188,9 +262,9 @@ export const TrackerPage: React.FC = () => {
 
         {/* Global Error Banner */}
         {error && (
-          <div className="alert alert-danger" role="alert">
+          <div className="alert alert-danger" role="alert" style={{ marginBottom: '20px' }}>
             <AlertCircle size={18} style={{ flexShrink: 0 }} />
-            <span style={{ flex: 1 }}>{error}</span>
+            <span style={{ flex: 1, wordBreak: 'break-word' }}>{error}</span>
             <button
               type="button"
               className="btn btn-secondary"
@@ -211,8 +285,8 @@ export const TrackerPage: React.FC = () => {
             <BuggyComponent section="Statistics" />
           ) : (
             totalCount > 0 && (
-              <section className="glass-panel progress-card" aria-label="Today's Progress">
-                <div className="progress-header">
+              <section className="glass-panel progress-card" aria-label="Today's Progress" style={{ marginBottom: '24px' }}>
+                <div className="progress-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <CheckCircle2 size={16} color="var(--neon-green)" />
                     <span style={{ fontWeight: 600 }}>Daily Completion</span>
@@ -221,7 +295,7 @@ export const TrackerPage: React.FC = () => {
                     {completionPercent}% ({completedCount} of {totalCount} completed)
                   </span>
                 </div>
-                <div className="progress-bar-bg">
+                <div className="progress-bar-bg" style={{ marginTop: '10px' }}>
                   <div
                     className="progress-bar-fill"
                     style={{ width: `${completionPercent}%` }}
@@ -234,13 +308,13 @@ export const TrackerPage: React.FC = () => {
 
         {/* Filter Tabs */}
         {totalCount > 0 && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px', flexWrap: 'wrap' }}>
             <ListFilter size={16} color="var(--text-muted)" />
             <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginRight: '4px' }}>Filter:</span>
             <button
               type="button"
               className={`btn btn-secondary ${filter === 'all' ? 'badge-neon' : ''}`}
-              style={{ padding: '6px 14px', fontSize: '0.82rem' }}
+              style={{ padding: '6px 12px', fontSize: '0.82rem' }}
               onClick={() => setFilter('all')}
             >
               All ({totalCount})
@@ -248,7 +322,7 @@ export const TrackerPage: React.FC = () => {
             <button
               type="button"
               className={`btn btn-secondary ${filter === 'pending' ? 'badge-neon' : ''}`}
-              style={{ padding: '6px 14px', fontSize: '0.82rem' }}
+              style={{ padding: '6px 12px', fontSize: '0.82rem' }}
               onClick={() => setFilter('pending')}
             >
               Pending ({totalCount - completedCount})
@@ -256,7 +330,7 @@ export const TrackerPage: React.FC = () => {
             <button
               type="button"
               className={`btn btn-secondary ${filter === 'completed' ? 'badge-neon' : ''}`}
-              style={{ padding: '6px 14px', fontSize: '0.82rem' }}
+              style={{ padding: '6px 12px', fontSize: '0.82rem' }}
               onClick={() => setFilter('completed')}
             >
               Completed ({completedCount})
@@ -264,17 +338,17 @@ export const TrackerPage: React.FC = () => {
           </div>
         )}
 
-        {/* 3. Habits List Section wrapped in ErrorBoundary */}
+        {/* 3. Habits List Section wrapped in ErrorBoundary (grid-cols-1 sm:grid-cols-2 lg:grid-cols-3) */}
         <ErrorBoundary
           sectionName="Habit List"
           onReset={() => setCrashedSection(null)}
         >
           {crashedSection === 'habits' ? (
             <BuggyComponent section="Habit List" />
-          ) : loading && habits.length === 0 ? (
+          ) : loading && combinedHabits.length === 0 ? (
             <div className="habits-grid">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="glass-panel skeleton" style={{ height: '84px' }} />
+                <div key={i} className="glass-panel skeleton" style={{ height: '120px' }} />
               ))}
             </div>
           ) : filteredHabits.length === 0 ? (
@@ -293,7 +367,15 @@ export const TrackerPage: React.FC = () => {
                 <HabitCard
                   key={habit.id}
                   habit={habit}
-                  onToggle={toggleDailyLog}
+                  onToggle={(habitId, currentCompleted) => {
+                    if (habitId.startsWith('offline_')) {
+                      setLocalQueuedHabits((prev) =>
+                        prev.map((h) => (h.id === habitId ? { ...h, completed_today: !currentCompleted } : h))
+                      )
+                      return
+                    }
+                    toggleDailyLog(habitId, currentCompleted)
+                  }}
                   onEdit={handleOpenEditModal}
                   onDelete={(h) => setHabitToDelete(h)}
                   disabled={actionLoading === habit.id}
@@ -328,6 +410,9 @@ export const TrackerPage: React.FC = () => {
         userEmail={user?.email || null}
         onUpload={uploadAvatar}
       />
+
+      {/* PWA Update Toast notification */}
+      <UpdateToast />
     </div>
   )
 }

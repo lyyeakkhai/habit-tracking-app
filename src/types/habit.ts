@@ -22,6 +22,7 @@ export interface HabitWithStatus extends Habit {
   completed_today: boolean
   current_streak: number
   today_log_id?: string
+  is_queued?: boolean
 }
 
 export interface CreateHabitInput {
