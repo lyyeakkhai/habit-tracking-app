@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState, useMemo } from 'react'
-import type { User, Session, AuthError } from '@supabase/supabase-js'
+import type { User, Session, AuthError, AuthChangeEvent } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 
 interface AuthContextType {
@@ -22,13 +22,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     let isMounted = true
 
     // 1. Fetch current session on initial page load
-    supabase.auth.getSession().then(({ data: { session }, error }) => {
+    supabase.auth.getSession().then(({ data, error }: { data: { session: Session | null }; error: AuthError | null }) => {
       if (error) {
         console.error('Error fetching initial auth session:', error.message)
       }
       if (isMounted) {
-        setSession(session)
-        setUser(session?.user ?? null)
+        setSession(data.session)
+        setUser(data.session?.user ?? null)
         setLoading(false)
       }
     })
@@ -36,7 +36,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // 2. Subscribe to auth state updates (sign in, sign out, token refresh)
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, currentSession) => {
+    } = supabase.auth.onAuthStateChange((_event: AuthChangeEvent, currentSession: Session | null) => {
       if (isMounted) {
         setSession(currentSession)
         setUser(currentSession?.user ?? null)
@@ -57,7 +57,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signUp = async (email: string, password: string) => {
     const { data, error } = await supabase.auth.signUp({ email, password })
-    return { error, user: data.user }
+    return { error, user: data?.user ?? null }
   }
 
   const signOut = async () => {
