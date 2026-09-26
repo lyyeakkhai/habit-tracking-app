@@ -79,7 +79,7 @@ export const SignupPage: React.FC = () => {
   }
 
   return (
-    <div className="auth-wrapper">
+    <main className="auth-wrapper">
       <div className="glass-panel auth-card">
         <div className="auth-header">
           <div className="auth-brand">
@@ -219,7 +219,7 @@ export const SignupPage: React.FC = () => {
           </Link>
         </div>
       </div>
-    </div>
+    </main>
   )
 }
 

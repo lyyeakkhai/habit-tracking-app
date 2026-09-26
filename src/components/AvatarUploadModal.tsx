@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { Upload, X, AlertCircle, Check, Camera, Image as ImageIcon } from 'lucide-react'
-import { validateAvatarFile, MAX_AVATAR_SIZE_BYTES } from '../hooks/useProfile'
+import { validateAvatarFile } from '../hooks/useProfile'
 
 interface AvatarUploadModalProps {
   isOpen: boolean
