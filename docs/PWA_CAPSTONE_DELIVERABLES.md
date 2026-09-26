@@ -16,7 +16,18 @@
 
 ---
 
-## 2. Workbox Runtime Caching Strategy & Defenses
+## 2. Deliverable Screenshots Gallery
+
+| Deliverable | Description | File Path |
+| :--- | :--- | :--- |
+| **1. Install Prompt** | Native browser installation prompt & macOS Safari install guide modal centered at page root. | [`docs/screenshots/1-install-prompt.png`](screenshots/1-install-prompt.png) |
+| **2. App Loading Offline in DevTools** | Chrome DevTools Network throttling set to Offline, assets served with 200 via `(ServiceWorker)`, sticky amber offline banner, and optimistic `"Queued Offline"` habit badge. | [`docs/screenshots/2-offline-devtools.png`](screenshots/2-offline-devtools.png) |
+| **3. Phone-Width Layout** | Tested on 320px viewport (iPhone SE emulation) with 0px horizontal scroll, single-column responsive habit grid, and $\ge 44\text{px}$ touch targets. | [`docs/screenshots/3-phone-layout-320px.png`](screenshots/3-phone-layout-320px.png) |
+| **4. Lighthouse Scores** | Mobile audit scorecard: **100 Accessibility**, **100 Best Practices**, **100 SEO**, and **89 Performance** (0 ms TBT, 0.000 CLS). | [`docs/screenshots/4-lighthouse-scores.png`](screenshots/4-lighthouse-scores.png) |
+
+---
+
+## 3. Workbox Runtime Caching Strategy & Defenses
 
 HABIT//PULSE combines compile-time precaching with targeted runtime caching rules configured via `vite-plugin-pwa` and Google Workbox.
 
@@ -49,7 +60,7 @@ HABIT//PULSE combines compile-time precaching with targeted runtime caching rule
 
 ---
 
-## 3. Lighthouse Mobile Audit Verification & Score Cards
+## 4. Lighthouse Mobile Audit Verification & Score Cards
 
 Lighthouse mobile audits were executed against the production build preview (`http://127.0.0.1:4173/`) under simulated mobile throttling (Moto G Power, simulated 4G / CPU slow-down).
 
@@ -80,7 +91,7 @@ Lighthouse mobile audits were executed against the production build preview (`ht
 
 ---
 
-## 4. Step-by-Step Verification Checklist & Testing Guide
+## 5. Step-by-Step Verification Checklist & Testing Guide
 
 ### Flow 1: PWA Installation Prompt
 - [x] **Prerequisites**: Open Google Chrome or Chromium-based browser in a clean profile (or non-standalone window).
@@ -141,7 +152,7 @@ Lighthouse mobile audits were executed against the production build preview (`ht
 
 ---
 
-## 5. Capstone File & Implementation Manifest
+## 6. Capstone File & Implementation Manifest
 
 | Component / Artifact | File Path | Purpose & Responsibility |
 | :--- | :--- | :--- |
