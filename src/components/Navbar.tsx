@@ -9,6 +9,7 @@ interface NavbarProps {
   totalCount?: number
   avatarUrl?: string | null
   onOpenAvatarModal?: () => void
+  onOpenInstallGuide?: () => void
   onSimulateCrash?: () => void
 }
 
@@ -17,6 +18,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   totalCount = 0,
   avatarUrl = null,
   onOpenAvatarModal,
+  onOpenInstallGuide,
   onSimulateCrash,
 }) => {
   const { user, signOut } = useAuth()
@@ -51,7 +53,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           )}
 
           {/* Install PWA Button */}
-          <InstallPwaButton />
+          <InstallPwaButton onOpenGuide={onOpenInstallGuide} />
 
           {/* Share App Button */}
           <ShareButton />

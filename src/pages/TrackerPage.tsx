@@ -6,6 +6,7 @@ import { DeleteModal } from '../components/DeleteModal'
 import { EmptyState } from '../components/EmptyState'
 import { ErrorBoundary } from '../components/ErrorBoundary'
 import { AvatarUploadModal } from '../components/AvatarUploadModal'
+import { InstallGuideModal } from '../components/InstallGuideModal'
 import { OfflineBanner } from '../components/OfflineBanner'
 import { useHabits } from '../hooks/useHabits'
 import { useProfile } from '../hooks/useProfile'
@@ -79,6 +80,7 @@ export const TrackerPage: React.FC = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false)
+  const [isInstallModalOpen, setIsInstallModalOpen] = useState(false)
   const [habitToEdit, setHabitToEdit] = useState<HabitWithStatus | null>(null)
   const [habitToDelete, setHabitToDelete] = useState<HabitWithStatus | null>(null)
   const [filter, setFilter] = useState<'all' | 'pending' | 'completed'>('all')
@@ -187,6 +189,7 @@ export const TrackerPage: React.FC = () => {
             totalCount={totalCount}
             avatarUrl={avatarUrl}
             onOpenAvatarModal={() => setIsAvatarModalOpen(true)}
+            onOpenInstallGuide={() => setIsInstallModalOpen(true)}
           />
         )}
       </ErrorBoundary>
@@ -416,6 +419,12 @@ export const TrackerPage: React.FC = () => {
         currentAvatarUrl={avatarUrl}
         userEmail={user?.email || null}
         onUpload={uploadAvatar}
+      />
+
+      {/* PWA Installation Guide Modal */}
+      <InstallGuideModal
+        isOpen={isInstallModalOpen}
+        onClose={() => setIsInstallModalOpen(false)}
       />
     </div>
   )
