@@ -1,6 +1,7 @@
 # The Mission: Production Deployment, Performance Pass & Expo Mobile Port
 
 **Repository Link:** [https://github.com/lyyeakkhai/habit-tracking-app.git](https://github.com/lyyeakkhai/habit-tracking-app.git)  
+**Live Vercel URL:** [https://habit-tracking-elczqa2dc-lyyeakkhais-projects.vercel.app](https://habit-tracking-elczqa2dc-lyyeakkhais-projects.vercel.app)  
 **Deliverable Document:** `docs/THE_MISSION_DELIVERABLES.md`  
 **Date:** 2026-09-26  
 
