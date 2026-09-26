@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { Share2, Check } from './icons'
+import { shareHabit } from '../lib/platformShare'
 
 interface ShareButtonProps {
   title?: string
@@ -34,36 +35,21 @@ export const ShareButton: React.FC<ShareButtonProps> = ({
   }, [])
 
   const handleShare = async () => {
-    if (typeof navigator !== 'undefined' && navigator.share) {
-      try {
-        await navigator.share({
-          title,
-          text,
-          url,
-        })
-        return
-      } catch (err: unknown) {
-        // If user cancelled, do nothing. If error, fall back to clipboard
-        if ((err as Error).name === 'AbortError') return
-      }
-    }
+    const result = await shareHabit({
+      title,
+      text,
+      url,
+    })
 
-    // Clipboard fallback
-    try {
-      if (typeof navigator !== 'undefined' && navigator.clipboard) {
-        const textToCopy = text ? `${text} ${url}`.trim() : url
-        await navigator.clipboard.writeText(textToCopy)
-        setCopied(true)
-        if (timeoutRef.current) {
-          clearTimeout(timeoutRef.current)
-        }
-        timeoutRef.current = setTimeout(() => {
-          setCopied(false)
-          timeoutRef.current = null
-        }, 2500)
+    if (result.copiedFallback) {
+      setCopied(true)
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
       }
-    } catch (clipboardErr) {
-      console.error('Clipboard copy failed:', clipboardErr)
+      timeoutRef.current = setTimeout(() => {
+        setCopied(false)
+        timeoutRef.current = null
+      }, 2500)
     }
   }
 
