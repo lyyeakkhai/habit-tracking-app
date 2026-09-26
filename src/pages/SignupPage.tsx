@@ -11,7 +11,7 @@ export const SignupPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null)
   const [successNotice, setSuccessNotice] = useState<string | null>(null)
 
-  const { signUp, user } = useAuth()
+  const { signUp, signIn, user } = useAuth()
   const navigate = useNavigate()
 
   // Redirect if already authenticated
@@ -46,19 +46,31 @@ export const SignupPage: React.FC = () => {
       const { error: signUpError, user: newUser, session: newSession } = await signUp(email.trim(), password)
       if (signUpError) {
         setError(signUpError.message)
-      } else if (newUser && newUser.identities && newUser.identities.length === 0) {
-        setError('An account with this email already exists.')
-      } else if (!newSession) {
-        // Email confirmation is required by Supabase project settings
-        setSuccessNotice(
-          'Account created! Please check your email inbox to confirm your address before signing in. (Tip: You can also disable "Confirm email" in your Supabase Dashboard under Authentication -> Providers -> Email for instant local dev).'
-        )
-      } else {
-        setSuccessNotice('Account created successfully! Redirecting to your habit dashboard...')
-        setTimeout(() => {
-          navigate('/', { replace: true })
-        }, 1200)
+        return
       }
+
+      if (newUser && newUser.identities && newUser.identities.length === 0) {
+        setError('An account with this email already exists.')
+        return
+      }
+
+      // If session exists immediately (email confirmation disabled in Supabase)
+      if (newSession) {
+        navigate('/', { replace: true })
+        return
+      }
+
+      // If no session returned, attempt automatic sign in
+      const { error: autoSignInError } = await signIn(email.trim(), password)
+      if (!autoSignInError) {
+        navigate('/', { replace: true })
+        return
+      }
+
+      // If sign in is blocked, Supabase has "Confirm email" enabled
+      setSuccessNotice(
+        'Account created! Please check your email inbox to confirm your address, or turn off "Confirm email" in Supabase Dashboard (Authentication -> Providers -> Email) to sign in directly.'
+      )
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'An unexpected error occurred during sign up.')
     } finally {
