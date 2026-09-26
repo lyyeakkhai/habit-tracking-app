@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { Upload, X, AlertCircle, Check, Camera, Image as ImageIcon } from 'lucide-react'
+import { Upload, X, AlertCircle, Check, Camera, Image as ImageIcon } from './icons'
 import { validateAvatarFile } from '../hooks/useProfile'
 
 interface AvatarUploadModalProps {

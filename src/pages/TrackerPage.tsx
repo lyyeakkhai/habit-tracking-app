@@ -13,7 +13,7 @@ import { useProfile } from '../hooks/useProfile'
 import { useNetworkStatus, getQueuedHabits } from '../hooks/useNetworkStatus'
 import { useAuth } from '../context/AuthContext'
 import type { HabitWithStatus, CreateHabitInput, UpdateHabitInput } from '../types/habit'
-import { Plus, RefreshCw, AlertCircle, CheckCircle2, ListFilter, ShieldAlert } from 'lucide-react'
+import { Plus, RefreshCw, AlertCircle, CheckCircle2, ListFilter, ShieldAlert } from '../components/icons'
 
 // Crash simulation component to test error boundary resilience
 const BuggyComponent: React.FC<{ section: string }> = ({ section }) => {

@@ -1,5 +1,5 @@
 import React from 'react'
-import { Sparkles, Plus } from 'lucide-react'
+import { Sparkles, Plus } from './icons'
 
 interface EmptyStateProps {
   onAddHabit: () => void

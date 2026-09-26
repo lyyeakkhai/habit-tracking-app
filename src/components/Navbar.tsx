@@ -1,6 +1,6 @@
 import React from 'react'
 import { useAuth } from '../context/AuthContext'
-import { Zap, LogOut, Camera } from 'lucide-react'
+import { Zap, LogOut, Camera } from './icons'
 import { InstallPwaButton } from './InstallPwaButton'
 import { ShareButton } from './ShareButton'
 

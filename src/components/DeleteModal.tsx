@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import type { HabitWithStatus } from '../types/habit'
-import { AlertTriangle, X } from 'lucide-react'
+import { AlertTriangle, X } from './icons'
 
 interface DeleteModalProps {
   isOpen: boolean

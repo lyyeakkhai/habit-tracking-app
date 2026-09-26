@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import type { HabitWithStatus, CreateHabitInput, UpdateHabitInput } from '../types/habit'
-import { X, AlertCircle } from 'lucide-react'
+import { X, AlertCircle } from './icons'
 
 interface HabitModalProps {
   isOpen: boolean

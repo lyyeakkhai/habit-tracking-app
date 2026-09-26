@@ -1,5 +1,5 @@
 import React from 'react'
-import { X, Laptop, Smartphone, Compass, Sparkles } from 'lucide-react'
+import { X, Laptop, Smartphone, Compass, Sparkles } from './icons'
 
 function detectPlatform(): 'mac-safari' | 'ios' | 'android' | 'desktop-chrome' | 'other' {
   if (typeof window === 'undefined' || typeof navigator === 'undefined') return 'other'

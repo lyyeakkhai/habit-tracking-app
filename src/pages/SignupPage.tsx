@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { Zap, AlertCircle, CheckCircle, ArrowRight, Lock, Mail } from 'lucide-react'
+import { Zap, AlertCircle, CheckCircle, ArrowRight, Lock, Mail } from '../components/icons'
 
 export const SignupPage: React.FC = () => {
   const [email, setEmail] = useState('')

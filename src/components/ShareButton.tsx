@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { Share2, Check } from 'lucide-react'
+import { Share2, Check } from './icons'
 
 interface ShareButtonProps {
   title?: string

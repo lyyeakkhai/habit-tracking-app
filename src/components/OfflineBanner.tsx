@@ -1,5 +1,5 @@
 import React from 'react'
-import { WifiOff, RefreshCw, CheckCircle } from 'lucide-react'
+import { WifiOff, RefreshCw, CheckCircle } from './icons'
 
 interface OfflineBannerProps {
   isOnline: boolean

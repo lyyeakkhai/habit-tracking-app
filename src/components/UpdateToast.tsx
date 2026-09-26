@@ -1,6 +1,6 @@
 import React from 'react'
 import { useRegisterSW } from 'virtual:pwa-register/react'
-import { Sparkles, RefreshCw, X } from 'lucide-react'
+import { Sparkles, RefreshCw, X } from './icons'
 
 export const UpdateToast: React.FC = () => {
   const {

@@ -1,6 +1,6 @@
 import React from 'react'
 import type { HabitWithStatus } from '../types/habit'
-import { Check, Flame, Edit3, Trash2, Calendar, WifiOff } from 'lucide-react'
+import { Check, Flame, Edit3, Trash2, Calendar, WifiOff } from './icons'
 import { ShareButton } from './ShareButton'
 
 interface HabitCardProps {
