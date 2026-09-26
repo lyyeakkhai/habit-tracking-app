@@ -1,5 +1,5 @@
 /* ==============================================================================
-   HABIT//PULSE: APP COMPONENT LAYOUTS & STYLES
+   HABIT//PULSE: APP COMPONENT LAYOUTS & STYLES (WHITE THEME)
    ============================================================================== */
 
 /* App Container */
@@ -7,6 +7,7 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background-color: var(--bg-deep);
 }
 
 .main-content {
@@ -26,6 +27,7 @@
   padding: 24px;
   position: relative;
   z-index: 1;
+  background-color: var(--bg-deep);
 }
 
 .auth-card {
@@ -33,6 +35,9 @@
   max-width: 440px;
   padding: 40px 32px;
   text-align: center;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.06), 0 0 25px rgba(0, 230, 118, 0.1);
 }
 
 .auth-header {
@@ -47,13 +52,13 @@
   font-size: 1.5rem;
   font-weight: 800;
   letter-spacing: -0.03em;
-  color: var(--neon-green);
-  text-shadow: var(--neon-glow);
+  color: #047857;
   margin-bottom: 8px;
 }
 
 .auth-title {
-  font-size: 1.4rem;
+  font-size: 1.45rem;
+  color: var(--text-primary);
   margin-bottom: 6px;
 }
 
@@ -69,7 +74,7 @@
 }
 
 .auth-link {
-  color: var(--neon-green);
+  color: #047857;
   font-weight: 600;
   text-decoration: none;
   margin-left: 6px;
@@ -78,7 +83,7 @@
 
 .auth-link:hover {
   text-decoration: underline;
-  text-shadow: 0 0 8px rgba(0, 255, 135, 0.4);
+  color: #059669;
 }
 
 /* Navbar */
@@ -86,10 +91,11 @@
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(7, 10, 14, 0.85);
+  background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(0, 255, 135, 0.12);
+  border-bottom: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
   padding: 14px 24px;
 }
 
@@ -113,13 +119,13 @@
   width: 32px;
   height: 32px;
   border-radius: var(--radius-sm);
-  background: linear-gradient(135deg, var(--neon-green), var(--neon-dark));
+  background: linear-gradient(135deg, var(--neon-green), #059669);
   display: flex;
   align-items: center;
   justify-content: center;
   color: #031208;
   font-weight: 900;
-  box-shadow: 0 0 15px rgba(0, 255, 135, 0.4);
+  box-shadow: 0 2px 10px rgba(0, 230, 118, 0.4);
 }
 
 .nav-brand-title {
@@ -131,7 +137,7 @@
 }
 
 .nav-brand-pulse {
-  color: var(--neon-green);
+  color: #047857;
 }
 
 .nav-actions {
@@ -145,8 +151,8 @@
   align-items: center;
   gap: 8px;
   padding: 6px 14px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
   border-radius: var(--radius-full);
   font-size: 0.82rem;
   font-family: var(--font-mono);
@@ -158,7 +164,7 @@
   height: 8px;
   border-radius: 50%;
   background: var(--neon-green);
-  box-shadow: 0 0 8px var(--neon-green);
+  box-shadow: 0 0 6px var(--neon-green);
 }
 
 /* Dashboard Header & Progress */
@@ -181,6 +187,7 @@
   font-size: 2.2rem;
   line-height: 1.1;
   margin-bottom: 6px;
+  color: var(--text-primary);
 }
 
 .header-subtitle {
@@ -195,6 +202,8 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
 }
 
 .progress-header {
@@ -207,7 +216,7 @@
 .progress-bar-bg {
   width: 100%;
   height: 10px;
-  background: rgba(255, 255, 255, 0.06);
+  background: #f1f5f9;
   border-radius: var(--radius-full);
   overflow: hidden;
   position: relative;
@@ -215,9 +224,9 @@
 
 .progress-bar-fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--neon-green) 0%, var(--neon-emerald) 100%);
+  background: linear-gradient(90deg, var(--neon-green) 0%, #059669 100%);
   border-radius: var(--radius-full);
-  box-shadow: 0 0 12px rgba(0, 255, 135, 0.5);
+  box-shadow: 0 0 10px rgba(0, 230, 118, 0.4);
   transition: width var(--transition-smooth);
 }
 
@@ -237,6 +246,8 @@
   gap: 16px;
   position: relative;
   overflow: hidden;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
 }
 
 .habit-card::before {
@@ -250,9 +261,14 @@
   transition: background var(--transition-fast);
 }
 
+.habit-card.completed-today {
+  background: #f0fdf4;
+  border-color: rgba(0, 230, 118, 0.4);
+}
+
 .habit-card.completed-today::before {
   background: var(--neon-green);
-  box-shadow: 0 0 12px var(--neon-green);
+  box-shadow: 0 0 8px var(--neon-green);
 }
 
 .habit-left {
@@ -268,8 +284,8 @@
   width: 46px;
   height: 46px;
   border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.15);
-  background: rgba(255, 255, 255, 0.03);
+  border: 2px solid #cbd5e1;
+  background: #f8fafc;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -281,12 +297,12 @@
 
 .check-toggle:hover {
   border-color: var(--neon-green);
-  background: rgba(0, 255, 135, 0.08);
-  box-shadow: 0 0 15px rgba(0, 255, 135, 0.2);
+  background: #f0fdf4;
+  box-shadow: 0 0 12px rgba(0, 230, 118, 0.25);
 }
 
 .check-toggle.active {
-  background: linear-gradient(135deg, var(--neon-green), var(--neon-dark));
+  background: linear-gradient(135deg, var(--neon-green), #059669);
   border-color: var(--neon-green);
   color: #041208;
   box-shadow: var(--neon-glow);
@@ -314,12 +330,12 @@
 }
 
 .habit-card.completed-today .habit-name {
-  color: #a7f3d0;
+  color: #065f46;
 }
 
 .habit-description {
   font-size: 0.85rem;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -342,8 +358,8 @@
 .empty-state-card {
   padding: 60px 32px;
   text-align: center;
-  border: 1px dashed rgba(0, 255, 135, 0.25);
-  background: rgba(14, 20, 18, 0.4);
+  border: 2px dashed rgba(0, 230, 118, 0.4);
+  background: #f8fafc;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -354,16 +370,17 @@
   width: 64px;
   height: 64px;
   border-radius: 50%;
-  background: rgba(0, 255, 135, 0.1);
+  background: rgba(0, 230, 118, 0.15);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--neon-green);
-  box-shadow: 0 0 25px rgba(0, 255, 135, 0.2);
+  color: #047857;
+  box-shadow: 0 0 20px rgba(0, 230, 118, 0.2);
 }
 
 .empty-state-title {
   font-size: 1.35rem;
+  color: var(--text-primary);
 }
 
 .empty-state-desc {
@@ -383,6 +400,7 @@
 
 .modal-header h2 {
   font-size: 1.35rem;
+  color: var(--text-primary);
 }
 
 .modal-close-btn {
@@ -409,13 +427,13 @@
 
 /* Delete Confirmation Specifics */
 .delete-warning-box {
-  background: rgba(255, 77, 109, 0.08);
-  border: 1px solid rgba(255, 77, 109, 0.25);
+  background: #fef2f2;
+  border: 1px solid #fecaca;
   border-radius: var(--radius-md);
   padding: 16px;
   margin: 16px 0 20px;
   font-size: 0.88rem;
-  color: #fca5a5;
+  color: #991b1b;
   line-height: 1.5;
 }
 
