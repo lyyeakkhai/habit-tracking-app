@@ -74,6 +74,11 @@ export const Navbar: React.FC<NavbarProps> = ({
                   src={avatarUrl}
                   alt="User Avatar"
                   className="nav-user-avatar"
+                  loading="lazy"
+                  decoding="async"
+                  width={36}
+                  height={36}
+                  style={{ aspectRatio: '1 / 1' }}
                 />
               ) : (
                 <div className="nav-user-initials">

@@ -153,7 +153,11 @@ export const AvatarUploadModal: React.FC<AvatarUploadModalProps> = ({
               <img
                 src={displayAvatar}
                 alt="Avatar Preview"
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                loading="lazy"
+                decoding="async"
+                width={160}
+                height={160}
+                style={{ width: '100%', height: '100%', objectFit: 'cover', aspectRatio: '1 / 1' }}
               />
             ) : (
               <div
