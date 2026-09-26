@@ -1,13 +1,22 @@
 import React from 'react'
 import { useAuth } from '../context/AuthContext'
-import { Zap, LogOut } from 'lucide-react'
+import { Zap, LogOut, Camera } from 'lucide-react'
 
 interface NavbarProps {
   completedCount?: number
   totalCount?: number
+  avatarUrl?: string | null
+  onOpenAvatarModal?: () => void
+  onSimulateCrash?: () => void
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ completedCount = 0, totalCount = 0 }) => {
+export const Navbar: React.FC<NavbarProps> = ({
+  completedCount = 0,
+  totalCount = 0,
+  avatarUrl = null,
+  onOpenAvatarModal,
+  onSimulateCrash,
+}) => {
   const { user, signOut } = useAuth()
 
   const handleSignOut = async () => {
@@ -17,6 +26,8 @@ export const Navbar: React.FC<NavbarProps> = ({ completedCount = 0, totalCount =
       console.error('Sign out error:', err)
     }
   }
+
+  const initials = user?.email ? user.email.slice(0, 2).toUpperCase() : 'HP'
 
   return (
     <header className="navbar">
@@ -37,11 +48,63 @@ export const Navbar: React.FC<NavbarProps> = ({ completedCount = 0, totalCount =
             </div>
           )}
 
+          {/* User Profile & Avatar Pill */}
           {user?.email && (
-            <div className="nav-user-pill" title={`Signed in as ${user.email}`}>
-              <div className="nav-user-dot" />
+            <div
+              className="nav-user-pill"
+              onClick={onOpenAvatarModal}
+              title={`Signed in as ${user.email}. Click to change avatar.`}
+              style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => e.key === 'Enter' && onOpenAvatarModal?.()}
+            >
+              {avatarUrl ? (
+                <img
+                  src={avatarUrl}
+                  alt="User Avatar"
+                  style={{
+                    width: '24px',
+                    height: '24px',
+                    borderRadius: '50%',
+                    objectFit: 'cover',
+                    border: '1.5px solid var(--neon-green)',
+                  }}
+                />
+              ) : (
+                <div
+                  style={{
+                    width: '24px',
+                    height: '24px',
+                    borderRadius: '50%',
+                    backgroundColor: 'rgba(0, 230, 118, 0.2)',
+                    color: 'var(--neon-green)',
+                    fontSize: '0.7rem',
+                    fontWeight: 700,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    border: '1px solid var(--neon-green)',
+                  }}
+                >
+                  {initials}
+                </div>
+              )}
               <span>{user.email}</span>
+              <Camera size={13} color="var(--text-muted)" style={{ marginLeft: '2px' }} />
             </div>
+          )}
+
+          {onSimulateCrash && (
+            <button
+              type="button"
+              className="btn btn-secondary"
+              style={{ fontSize: '0.75rem', padding: '4px 8px', color: '#dc2626', borderColor: 'rgba(239, 68, 68, 0.3)' }}
+              onClick={onSimulateCrash}
+              title="Test Error Boundary in Navigation"
+            >
+              💥 Crash Nav
+            </button>
           )}
 
           <button
