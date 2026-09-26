@@ -7,6 +7,16 @@
 
 ---
 
+## Deliverable Screenshots Gallery
+
+| Deliverable | Description | High-Resolution Image Link |
+| :--- | :--- | :--- |
+| **1. Build Chunk Output Table** | Verified before/after compilation metrics showing -94.3% reduction in entry bundle and -95.2% reduction in transformed modules. | [`docs/screenshots/mission-1-chunk-table.png`](screenshots/mission-1-chunk-table.png) |
+| **2. Live App Signed In** | Production deployment on Vercel with authenticated user session, active habits, streaks, and completion state. | [`docs/screenshots/mission-2-live-app-signed-in.png`](screenshots/mission-2-live-app-signed-in.png) |
+| **3. Expo Habit List (Mobile)** | React Native Expo application running FlatList habit cards, streak badges, completion toggles, and native share. | [`docs/screenshots/mission-3-expo-habit-list.png`](screenshots/mission-3-expo-habit-list.png) |
+
+---
+
 ## 1. Hand-Written Route Lazy-Split Decision
 
 ### Heaviest Route Selected: `TrackerPage` (`src/pages/TrackerPage.tsx`)
