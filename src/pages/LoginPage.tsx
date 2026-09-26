@@ -34,7 +34,13 @@ export const LoginPage: React.FC = () => {
       setLoading(true)
       const { error: signInError } = await signIn(email.trim(), password)
       if (signInError) {
-        setError(signInError.message)
+        if (signInError.message.toLowerCase().includes('invalid login credentials')) {
+          setError(
+            'Invalid login credentials. Note: If you recently signed up, make sure your email was confirmed in your inbox, or disable "Confirm email" in your Supabase Dashboard (Authentication -> Providers -> Email).'
+          )
+        } else {
+          setError(signInError.message)
+        }
       } else {
         const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/'
         navigate(from, { replace: true })
